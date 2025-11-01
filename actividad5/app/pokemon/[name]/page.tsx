@@ -2,12 +2,26 @@ import axios from 'axios';
 import Link from 'next/link';
 
 async function fetchPokemonData(name: string) {
-    const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${name}`);
-    return res.data;
+    try{
+        const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${name}`);
+        return res.data;
+    } catch (error) {
+        console.error("Error fetching Pokemon:", error);
+        return null;
+    }
 }
 
-export default async function PokemonPage({ params }: { params: { name: string } }) {
-    const pokemonData = await fetchPokemonData(params.name);
+export default async function PokemonPage({params}: {params: Promise<{name: string}>}) {
+    const { name } = await params;
+    const pokemonData = await fetchPokemonData(name.toLowerCase());
+    if (!pokemonData) {
+        return (
+            <main>
+                <h1>Pokemon not found</h1>
+            </main>
+        );
+    }
+
     return (
         <main
             style={{
