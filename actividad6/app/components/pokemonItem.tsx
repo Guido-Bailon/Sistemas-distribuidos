@@ -1,7 +1,9 @@
 "use client";
-import {useEffect, useState} from "react";
 import axios from "axios";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css'; 
 
 type PokemonData = {
   sprites: { front_default: string;
@@ -13,32 +15,35 @@ type PokemonData = {
 };
 
 export default function PokemonItem({ name, url }: { name: string; url: string }) {
-  const [pokemonData, setPokemonData] = useState<PokemonData | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchPokemonData(url);
-        setPokemonData(data);
-      } catch (err) {
-        setError("No se pudo cargar el Pokémon");
-      }
-    };
-    fetchData();
-  }, [url]);
+  const {data:pokemonData, isLoading, isError} = useQuery<PokemonData, Error>({
+    queryKey: ['pokemon', name],
+    queryFn: () => fetchPokemonData(url),
+  });
 
-  if (error) return <div>{error}</div>;
+  if (isError) return <div>Error fetching Pokémon data</div>;
   if (!pokemonData) return <div>Loading...</div>;
 
 const imageSrc = pokemonData.sprites.other['official-artwork'].front_default || pokemonData.sprites.front_default || '/placeholder.png';
   return (
     <Link href={`/pokemon/${name}`}>
         <div>
-            <h3 style={{ textTransform: 'capitalize', textAlign: 'center' }}>{name}</h3>
-            <div className="flex justify-center">
-                <img src={imageSrc} alt={`${name} sprite`} />
-            </div>
+          {isLoading ? (
+            <>
+              <Skeleton height={100} width={100} style={{marginBottom: '10px'}}/>
+              <Skeleton height={20} width={`100%`} />
+              <div className="flex justify-center">
+                  <Skeleton height={100} width={100} />
+              </div>
+            </>
+          ) : (
+            <>
+              <h3 style={{ textTransform: 'capitalize', textAlign: 'center' }}>{name}</h3>
+              <div className="flex justify-center">
+                  <img src={imageSrc} alt={`${name} sprite`} />
+              </div>
+            </>
+          )}
         </div>
     </Link>
   );
