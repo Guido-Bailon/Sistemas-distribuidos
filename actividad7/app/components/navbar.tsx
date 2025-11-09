@@ -4,6 +4,7 @@ import Link from "next/link";
 export default function Navbar() {
   return (
     <nav
+      className="bg-gray-800 text-white py-3 px-6 flex justify-between items-center"
         style={{
             width: '100%',
             backgroundColor: '#333',
@@ -16,8 +17,13 @@ export default function Navbar() {
         }}
     >
         <Link href="/" style={{ color: 'white', textDecoration: 'none' }}>
-            <h2>Home</h2>
+          <h2>Home</h2>
         </Link>
+        <div className="flex gap-4">
+          <Link href="/favorites" className="hover:underline">
+           <h2>Favorites</h2>
+          </Link>
+        </div>
     </nav>
   );
 }
